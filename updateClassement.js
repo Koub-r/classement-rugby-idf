@@ -1,31 +1,35 @@
-name: Mise à jour classement
+const fetch = require("node-fetch");
+const cheerio = require("cheerio");
+const fs = require("fs");
 
-on:
-  schedule:
-    - cron: '0 3 * * 1'
-  workflow_dispatch:
+const URL = "https://rugbyamateur.fr/regionales/ile-de-france/regionale-2/classement/";
 
-jobs:
-  update:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+async function run() {
+  const res = await fetch(URL);
+  const data = await res.text();
+  const $ = cheerio.load(data);
 
-      - name: Installer Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
+  let equipes = [];
 
-      - name: Installer dépendances
-        run: npm install
+  $(".table").each((i, table) => {
+    const poule = `Poule ${i + 1}`;
+    $(table).find("tbody tr").each((_, row) => {
+      const td = $(row).find("td");
+      equipes.push({
+        club: td.eq(1).text().trim(),
+        joues: parseInt(td.eq(2).text()),
+        points: parseInt(td.eq(3).text()),
+        diff: parseInt(td.eq(8).text()),
+        poule
+      });
+    });
+  });
 
-      - name: Mettre à jour classement
-        run: node updateClassement.js
+  equipes.sort((a,b) => b.points - a.points);
+  equipes.forEach((e,i)=> e.rang = i+1);
 
-      - name: Commit automatique
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add classement.json
-          git commit -m "Mise à jour classement" || echo "Aucun changement"
-          git push
+  fs.writeFileSync("classement.json", JSON.stringify(equipes, null, 2));
+  console.log("Classement mis à jour");
+}
+
+run();
