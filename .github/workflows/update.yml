@@ -17,7 +17,7 @@ jobs:
           node-version: 16
 
       - name: Installer dépendances
-        run: npm install axios cheerio
+        run: npm install
 
       - name: Mettre à jour classement
         run: node updateClassement.js
