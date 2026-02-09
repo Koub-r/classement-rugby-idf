@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "node-fetch": "2.6.12",
+    "puppeteer": "^23.3.0",
     "cheerio": "1.0.0-rc.12"
   }
 }
