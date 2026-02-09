@@ -1,0 +1,31 @@
+name: Mise à jour classement
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Installer Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Installer dépendances
+        run: npm install axios cheerio
+
+      - name: Mettre à jour classement
+        run: node updateClassement.js
+
+      - name: Commit automatique
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add classement.json
+          git commit -m "Mise à jour classement" || echo "Aucun changement"
+          git push
