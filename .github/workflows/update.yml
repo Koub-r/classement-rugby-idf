@@ -29,3 +29,7 @@ jobs:
           git add classement.json
           git commit -m "Mise à jour classement" || echo "Aucun changement"
           git push
+
+
+          git commit -m "Mise à jour classement" || echo "Aucun changement"
+          git push
