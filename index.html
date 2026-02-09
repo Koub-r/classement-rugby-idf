@@ -2,48 +2,48 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Classement Régionale 2 IDF</title>
+<title>Classement Général Régionale 2 IDF</title>
 <style>
-body { font-family: Arial; padding: 20px; }
-table { border-collapse: collapse; width: 100%; }
-th, td { border: 1px solid #444; padding: 6px; text-align: center; }
-th { background: #eee; }
-td.club { text-align: left; }
+  body { font-family: Arial; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #444; padding: 6px 10px; text-align: center; }
+  th { background: #eee; }
+  td.club { text-align: left; }
 </style>
 </head>
 <body>
 
 <h1>Classement Général – Régionale 2 Île-de-France</h1>
 
-<table>
-<thead>
-<tr>
-<th>Rang</th>
-<th>Club</th>
-<th>Pts</th>
-<th>J</th>
-<th>Diff</th>
-<th>Poule</th>
-</tr>
-</thead>
-<tbody id="classement"></tbody>
+<table id="classement">
+  <thead>
+    <tr>
+      <th>Rang</th>
+      <th>Club</th>
+      <th>Pts</th>
+      <th>J</th>
+      <th>Diff</th>
+      <th>Poule</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
 </table>
 
 <script>
 fetch("classement.json")
-  .then(r => r.json())
+  .then(res => res.json())
   .then(data => {
-    const tbody = document.getElementById("classement");
+    const tbody = document.querySelector("#classement tbody");
     data.forEach(e => {
       tbody.innerHTML += `
-      <tr>
-        <td>${e.rang}</td>
-        <td class="club">${e.club}</td>
-        <td>${e.points}</td>
-        <td>${e.joues}</td>
-        <td>${e.diff}</td>
-        <td>${e.poule}</td>
-      </tr>`;
+        <tr>
+          <td>${e.rang}</td>
+          <td class="club">${e.club}</td>
+          <td>${e.points}</td>
+          <td>${e.joues}</td>
+          <td>${e.diff}</td>
+          <td>${e.poule}</td>
+        </tr>`;
     });
   });
 </script>
