@@ -1,35 +1,42 @@
-name: Mise à jour classement
+const puppeteer = require('puppeteer');
+const cheerio = require('cheerio');
+const fs = require('fs');
 
-on:
-  schedule:
-    - cron: '0 3 * * 1'
-  workflow_dispatch:
+const URL = 'https://rugbyamateur.fr/regionales/ile-de-france/regionale-2/classement/';
 
-jobs:
-  update:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+(async () => {
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true
+  });
+  const page = await browser.newPage();
+  await page.goto(URL, {waitUntil: 'networkidle2'});
 
-      - name: Installer Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
+  const html = await page.content();
+  const $ = cheerio.load(html);
 
-      - name: Installer dépendances
-        run: npm install
+  let equipes = [];
 
-      - name: Mettre à jour classement
-        run: node updateClassement.js
+  $("table.table-striped").each((i, table) => {
+    const poule = `Poule ${i + 1}`;
 
-      - name: Commit automatique
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add classement.json
-          git commit -m "Mise à jour classement" || echo "Aucun changement"
-          git push
+    $(table).find("tbody tr").each((_, row) => {
+      const td = $(row).find("td");
+      equipes.push({
+        club: td.eq(1).text().trim(),
+        joues: parseInt(td.eq(2).text()) || 0,
+        points: parseInt(td.eq(3).text()) || 0,
+        diff: parseInt(td.eq(8).text()) || 0,
+        poule
+      });
+    });
+  });
 
+  equipes.sort((a,b) => b.points - a.points);
+  equipes.forEach((e,i) => e.rang = i + 1);
 
-          git commit -m "Mise à jour classement" || echo "Aucun changement"
-          git push
+  fs.writeFileSync("classement.json", JSON.stringify(equipes, null, 2));
+  console.log("Classement mis à jour avec", equipes.length, "équipes");
+
+  await browser.close();
+})();
