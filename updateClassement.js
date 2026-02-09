@@ -12,6 +12,10 @@ const URL = 'https://rugbyamateur.fr/regionales/ile-de-france/regionale-2/classe
   const page = await browser.newPage();
   await page.goto(URL, {waitUntil: 'networkidle2'});
 
+  // ATTENTE explicite : attendre que le tableau complet soit présent
+  await page.waitForSelector('table.table-striped tbody tr');
+
+  // Prendre tout le HTML du DOM après rendu complet
   const html = await page.content();
   const $ = cheerio.load(html);
 
